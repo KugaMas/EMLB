@@ -1,6 +1,11 @@
 # Editor directories and files
 .idea
 .vscode
+.git
 
 # Cmake files
 build/
+datasets/
+
+# __pycache__
+*.pyc

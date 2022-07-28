@@ -4,20 +4,40 @@ import os
 import glob
 import yaml
 
-class Dataset():
+
+class Dataset:
     def __init__(self, path, size, fclass, use_aps):
-        self.idx     = 0
         self.size    = size
         self.fclass  = fclass
         self.use_aps = use_aps
         
         # load all file paths
         self.file_paths = [file for folder in fclass for file in glob.glob(f"{path}/{folder}/*")]
+        self.file_nums  = len(self.file_paths)
         self.file_paths.sort()
-        self.file_paths = tqdm(self.file_paths)
+        self.file_paths = self.file_paths.__iter__()
+
+        # initialize nullptr parameters
+        self.path  = None
+        self.name  = None
+        self.ev    = None
+        self.fr    = None
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.path = self.file_paths.__next__()
+        path, name = os.path.split(self.path)
+        name, ext  = os.path.splitext(name)
+        self.name = f"{os.path.basename(path)}/{name}"
+        return self.path
+
+    def __len__(self):
+        return self.file_nums
         
 
-class Database():
+class Database:
     def __init__(self, args, save_path='options/dataset_info.yaml'):
         self.path, self.loader = args.input_path, dict()
         for fname in os.listdir(self.path):
@@ -64,6 +84,7 @@ def set_inference_options(parser):
 
     """ Parser """
     args = parser.parse_args()
+    assert len(args.denoisors) == len(args.params), "The number of denoisors must match parameters"
 
     """ Load Parameters Preparation """
     args.abs_path    = os.getcwd()
