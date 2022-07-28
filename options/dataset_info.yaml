@@ -1,42 +1,14 @@
 D-CEND:
-  size:
-    - 346
-    - 260
-  frame: True
-
+  class:
+  - Architecture
+  frame: false
+  size: !!python/tuple
+  - -1
+  - -1
 N-CEND:
-  size:
-    - 346
-    - 260
-  frame: True
-
-DVS NOISE20:
-  size:
-    - 346
-    - 260
-  frame: True
-
-RGB DAVIS:
-  size:
-    - 190
-    - 180
-  frame: False
-
-ECD:
-  size:
-    - 240
-    - 180
-  frame: True
-
-ENFS:
-  size:
-    - 222
-    - 124
-  frame: False
-
-Unknown:
-  size:
-    - -1
-    - -1
-  frame: False
-
+  class:
+  - Bat
+  frame: false
+  size: !!python/tuple
+  - -1
+  - -1
