@@ -12,12 +12,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Deployment of EMLB benchmark')
     parser.add_argument('-i', '--input_path', type=str, default='datasets', help='path to load dataset')
     parser.add_argument('-o', '--output_path', type=str, default='results', help='path to output denoising result')
-    parser.add_argument('-d', '--denoisors', type=list, default=['mlpf', ], help='choose denoisors')
-    parser.add_argument("-p", "--params", type=float, default=[[True, True], ], nargs='+', help="specified parameters")
+    parser.add_argument('-d', '--denoisors', type=list, default=['dwf', ], help='choose denoisors')
+    parser.add_argument("-p", "--params", type=float, default=[[], ], nargs='+', help="specified parameters")
     args = set_inference_options(parser)
     
-    for i in range(len(args.denoisors)):
-        model = Denoisor(args.denoisors[i], args.params[i]) # load model
+    for idx in range(len(args.denoisors)):
+        model = Denoisor(idx, args) # load model
         for fdata in args.database:
             pbar = tqdm(fdata)
             for file in pbar:
@@ -32,4 +32,5 @@ if __name__ == '__main__':
                 # load event data and perform inference
                 ev, fr, size = load_file(fdata.path, aps=fdata.use_aps, size=fdata.size)
 
-
+                # start model inference
+                ev = model.run(ev, fr, size)

@@ -1,14 +1,14 @@
 D-CEND:
   class:
   - Architecture
-  frame: false
+  frame: true
   size: !!python/tuple
-  - -1
-  - -1
+  - 346
+  - 260
 N-CEND:
   class:
   - Bat
-  frame: false
+  frame: true
   size: !!python/tuple
-  - -1
-  - -1
+  - 346
+  - 260
