@@ -9,6 +9,11 @@ datasets/
 
 # Official head
 pybind11/
+onnxruntime/
+
+# files
+results
+*.so
 
 # __pycache__
 *.pyc

@@ -76,7 +76,7 @@ class Database:
 
 def set_inference_options(parser):
     """ Fundamental Information Settings """
-    parser.add_argument('--output_file_type', type=str, default='aedat4', help='output file type')
+    parser.add_argument('--output_file_type', type=str, default='pkl', help='output file type')
 
     """ Data Preprocess Settings """
     parser.add_argument('--use_polarity', type=bool, default=True)

@@ -5,14 +5,14 @@ import numpy as np
 
 from options.options import set_inference_options
 from scripts.denoisors import Denoisor
-from scripts.utils.file_utils import load_file
+from scripts.utils.file_utils import load_file, save_file
 from tqdm import tqdm
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Deployment of EMLB benchmark')
     parser.add_argument('-i', '--input_path', type=str, default='datasets', help='path to load dataset')
     parser.add_argument('-o', '--output_path', type=str, default='results', help='path to output denoising result')
-    parser.add_argument('-d', '--denoisors', type=list, default=['dwf', ], help='choose denoisors')
+    parser.add_argument('-d', '--denoisors', type=list, default=['mlpf', ], help='choose denoisors')
     parser.add_argument("-p", "--params", type=float, default=[[], ], nargs='+', help="specified parameters")
     args = set_inference_options(parser)
     
@@ -34,3 +34,6 @@ if __name__ == '__main__':
 
                 # start model inference
                 ev = model.run(ev, fr, size)
+
+                # save inference result
+                # save_file(ev, fr, model.__dict__, output_path)

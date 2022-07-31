@@ -9,8 +9,14 @@
 #include <boost/circular_buffer.hpp>
 
 namespace py = pybind11;
+
 using namespace std;
+
 namespace dv {
+
+    using Array  = py::array_t<uint64_t>;
+    using Vector = std::vector<std::array<uint64_t, 4>>;
+
     struct Event {
         uint64_t ts;
         uint16_t x;
@@ -18,7 +24,7 @@ namespace dv {
         bool p;
 
         Event(uint64_t ts_, uint16_t x_, uint16_t y_, bool p_) : ts(ts_), x(x_), y(y_), p(p_) {}
-    };
+    }; 
 }
 
 namespace edn {
@@ -37,44 +43,49 @@ namespace edn {
     public:
         EventDenoisor(uint16_t sizeX, uint16_t sizeY) : sizeX(sizeX), sizeY(sizeY) {};
         virtual ~EventDenoisor() {};
-        void initialization(py::array_t<uint64_t> arrts, py::array_t<uint16_t> arrx, py::array_t<uint16_t> arry, py::array_t<bool> arrp);
+        virtual dv::Vector initialization(py::array_t<uint64_t> arrts, py::array_t<uint16_t> arrx, py::array_t<uint16_t> arry, py::array_t<bool> arrp);
     };
 
     class DoubleWindowFilter: public EventDenoisor {
     private:
-        int mLen;
-        int numThr;
-        int disThr;
+        int thres;
+        int radius;
         bool useDoubleMode;
         boost::circular_buffer<dv::Event> lastREvents;
         boost::circular_buffer<dv::Event> lastNEvents;
     public:
-        DoubleWindowFilter(uint16_t sizeX, uint16_t sizeY, int numThr, int disThr, bool useDoubleMode, int mLen) : EventDenoisor(sizeX, sizeY) {
-            this->numThr = numThr;
-            this->disThr = disThr;
+        DoubleWindowFilter(uint16_t sizeX, uint16_t sizeY, int numMustBeCorrelated, int disThr, bool useDoubleMode, int memSize) : EventDenoisor(sizeX, sizeY) {
+            thres = numMustBeCorrelated;
+            radius = disThr;
             this->useDoubleMode = useDoubleMode;
-            this->mLen = useDoubleMode ? mLen : mLen / 2;   
-            this->lastREvents.set_capacity(mLen);
-            this->lastNEvents.set_capacity(mLen);
+            memSize = useDoubleMode ? memSize : memSize / 2;
+            lastREvents.set_capacity(memSize);
+            lastNEvents.set_capacity(memSize);
         };
-        py::array_t<uint64_t> run(py::array_t<uint64_t> arrts, py::array_t<uint16_t> arrx, py::array_t<uint16_t> arry, py::array_t<bool> arrp);
+        dv::Array run(py::array_t<uint64_t> arrts, py::array_t<uint16_t> arrx, py::array_t<uint16_t> arry, py::array_t<bool> arrp);
 
         // Addtional function
         int calculateDensity(dv::Event& event);
     };
 
-    // class MultiLayerPerceptronFilter : public EventDenoisor {
-    // private:
-    // public:
-    //     DoubleWindowFilter(uint16_t sizeX, uint16_t sizeY, int numThr, int disThr, bool useDoubleMode, int mLen) : EventDenoisor(sizeX, sizeY) {
-    //         this->numThr = numThr;
-    //         this->disThr = disThr;
-    //         this->useDoubleMode = useDoubleMode;
-    //         this->mLen = useDoubleMode ? mLen : mLen / 2;   
-    //         this->lastREvents.set_capacity(mLen);
-    //         this->lastNEvents.set_capacity(mLen);
-    //     };
-    // }
+    class MultiLayerPerceptronFilter: public EventDenoisor {
+    private:
+        int thres;
+        int radius;
+        bool usePolarity;
+        bool useTimesurface;
+
+        bool *polMap; 
+        uint64_t *tsMap;
+
+    public:
+        MultiLayerPerceptronFilter(uint16_t sizeX, uint16_t sizeY) : EventDenoisor(sizeX, sizeY) {
+            polMap = (bool*)     std::calloc(sizeX * sizeY, sizeof(bool));
+            tsMap  = (uint64_t*) std::calloc(sizeX * sizeY, sizeof(uint64_t));
+        }
+        dv::Array run(py::array_t<uint64_t> arrts, py::array_t<uint16_t> arrx, py::array_t<uint16_t> arry, py::array_t<bool> arrp);
+    };
+
 }
 
 #endif

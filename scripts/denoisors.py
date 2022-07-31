@@ -38,8 +38,8 @@ class EventDenoisors(ABC):
 class dwf(EventDenoisors):
     def __init__(self, use_polarity=True, excl_hotpixel=True,
                  num_thr=1, dis_thr=10, double_mode=True, m_len=8):
-        self.name           = 'MLPF'
-        self.annotation     = 'Multilayer Perceptron denoising Filter'
+        self.name           = 'DWF'
+        self.annotation     = 'Double Window Filter'
         self.use_polarity   = use_polarity
         self.excl_hotpixel  = excl_hotpixel
         
@@ -50,8 +50,20 @@ class dwf(EventDenoisors):
 
     def run(self, ev, fr, size):
         ts, x, y, p = self.pre_prosess(self, ev, size)
-        self.model  = cdn.dwf(size[0], size[1], self.numThr, self.disThr, self.duoMode, self.mLen)
-        return self.model.run(ts, x, y, p)
+        model  = cdn.dwf(size[0], size[1], self.numThr, self.disThr, self.duoMode, self.mLen)
+        return model.run(ts, x, y, p)
+
+class mlpf(EventDenoisors):
+    def __init__(self, use_polarity=True, excl_hotpixel=True):
+        self.name           = 'MLPF'
+        self.annotation     = 'Multi Layer Perceptron Filter'
+        self.use_polarity   = use_polarity
+        self.excl_hotpixel  = excl_hotpixel
+
+    def run(self, ev, fr, size):
+        ts, x, y, p = self.pre_prosess(self, ev, size)
+        model  = cdn.mlpf(size[0], size[1])
+        return model.run(ts, x, y, p)
 
 
 def Denoisor(idx, args):

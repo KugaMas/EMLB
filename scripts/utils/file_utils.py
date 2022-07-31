@@ -1,15 +1,19 @@
+import os
+import pickle
+
 import numpy as np
 import pandas as pd
 import os.path as osp
 
 from dv import AedatFile
 from zipfile import ZipFile
+from scipy.io import savemat
 from numpy.lib import recfunctions as rfn
 
 
 def load_file(file_path, size=(-1, -1), aps=False):
     ext = osp.splitext(osp.basename(file_path))[1]
-    assert ext in ['.h5', '.pkl', '.aedat4'], "Unsupported file type"
+    assert ext in ['.h5', '.pkl', '.aedat4'], "Unsupported read file type"
     
     if ext == '.aedat4':
         with AedatFile(file_path) as f:
@@ -43,3 +47,20 @@ def load_file(file_path, size=(-1, -1), aps=False):
                 fr = [[np.array(packet[0]), packet[1]] for packet in pd.read_pickle(f)['frames']]
 
     return ev, fr, size
+
+
+def save_file(ev, fr, param, file_path):
+    ext = osp.splitext(osp.basename(file_path))[1]
+    assert ext in ['.h5', '.pkl', '.txt'], "Unsupported write file type"
+
+    dir_path, file_name = osp.split(file_path)
+    if not osp.exists(dir_path):
+        os.makedirs(dir_path)
+        os.makedirs(f"{dir_path}/.params")
+
+    # save paramters
+    savemat(f"{dir_path}/.params/{file_name.replace(ext, '.mat')}", param)
+
+    if ext == '.pkl':
+        with open(file_path, 'wb+') as f:
+            pickle.dump(dict(event=ev, frame=fr), f)
